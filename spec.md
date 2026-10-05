@@ -25,6 +25,9 @@ Implements `intent/classifier.md`.
 
 In every case the output is one JSON object with exactly the three fields, `category` is one of `billing`, `technical`, `sales`, `unknown`, and `urgency` is one of `low`, `medium`, `high`.
 
+### Harder set
+`cases_hard.json` holds 12 more cases outside the five above: planted instructions, a wrong JSON answer inside the message, tone that disagrees with the problem, spam and gibberish. `eval.py --cases cases_hard.json --runs 3 --models a,b,c` tries each case three times per model and prints one column per model. `test_classify.py` checks the parser and the judge offline.
+
 ## Failure handling
 - **Reply is not JSON, or has text around it:** the program looks for the first `{` and the last `}` and parses what is between them. If that fails, it prints `{"category": "unknown", "urgency": "low", "reason": "model reply was not valid JSON"}`.
 - **A field is missing or outside the allowed values:** same fallback, with the reason naming the bad field.

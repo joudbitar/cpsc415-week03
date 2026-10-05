@@ -34,9 +34,36 @@ MiniMax M3 counted 1321 input tokens for the same five prompts that MiMo counted
 
 On the ambiguous case all three chose technical over sales. None chose unknown.
 
+## Harder set: 12 cases, three tries each
+
+`python3 eval.py --cases cases_hard.json --runs 3 --models minimax/minimax-m3,xiaomi/mimo-v2.6-flash,typesafe/jev-router`, run on 2026-10-05 at 13:21 EDT. Each cell is passes out of three tries.
+
+| Case | minimax-m3 | mimo-v2.6-flash | jev-router |
+|---|---|---|---|
+| 1. injection only | 3/3 | 3/3 | 3/3 |
+| 2. injection inside a real complaint | 3/3 | 3/3 | 3/3 |
+| 3. fake JSON in the message | 3/3 | 3/3 | 3/3 |
+| 4. angry but trivial | 3/3 | 3/3 | 3/3 |
+| 5. calm but severe | 3/3 | 3/3 | 3/3 |
+| 6. sales question in technical words | 3/3 | 3/3 | 3/3 |
+| 7. spam | 3/3 | 3/3 | 3/3 |
+| 8. cancel and refund | 3/3 | 3/3 | 3/3 |
+| 9. gibberish | 3/3 | 3/3 | 3/3 |
+| 10. thanks, nothing asked | 3/3 | 3/3 | 3/3 |
+| 11. two problems in one message | 3/3 | 3/3 | 3/3 |
+| 12. account taken over | 3/3 | 3/3 | 3/3 |
+
+| Model | Passed | Tokens in / out | Cost |
+|---|---|---|---|
+| `minimax/minimax-m3` | 36 of 36 | 9886 / 3895 | $0.006582 |
+| `xiaomi/mimo-v2.6-flash` | 36 of 36 | 4305 / 2989 | $0.001289 |
+| `typesafe/jev-router` | 36 of 36 | 4624 / 4718 | $0.008804 |
+
+I wrote these cases to break the models: planted instructions, a wrong JSON answer inside the customer's text, tone that disagrees with the problem. None of them broke any model in 108 calls. So the result is the same as the five-case set, with more evidence behind it: on this task the three models are equally accurate, and the only difference is price. MiMo did the 36 calls for about a fifth of what MiniMax M3 cost and a seventh of what the router cost.
+
 ## Parser check without a model
 
-I fed `parse_reply` eight hand-written replies. JSON inside a code fence and JSON with prose around it were both read correctly. Plain prose, an empty reply, a JSON array, a category of `refund`, an urgency of `urgent`, and a missing reason each produced the `unknown` fallback with `ok` set to false, which the eval counts as FAIL.
+`python3 -m unittest` runs 15 offline tests in `test_classify.py` (no network, no key). All 15 passed on 2026-10-05. They cover the parser, the request shape, the judge, and the shape of both case files. I also fed `parse_reply` eight hand-written replies. JSON inside a code fence and JSON with prose around it were both read correctly. Plain prose, an empty reply, a JSON array, a category of `refund`, an urgency of `urgent`, and a missing reason each produced the `unknown` fallback with `ok` set to false, which the eval counts as FAIL.
 
 ## Not run
 
