@@ -3,32 +3,47 @@
     "name": "clear billing",
     "purpose": "A plain billing problem. Catches a model that cannot do the easy case, and checks that a wrong charge is high urgency.",
     "message": "I was charged twice for my subscription this month.",
-    "category": ["billing"],
-    "urgency": "high"
+    "category": [
+      "billing"
+    ],
+    "urgency": [
+      "high"
+    ]
   },
   {
     "name": "clear technical",
     "purpose": "A plain technical problem where the customer is blocked. Checks category and that being locked out is high urgency.",
     "message": "The app crashes every time I log in, I can't use it at all.",
-    "category": ["technical"],
-    "urgency": "high"
+    "category": [
+      "technical"
+    ],
+    "urgency": [
+      "high"
+    ]
   },
   {
     "name": "clear sales",
     "purpose": "A plain pre-purchase question. Urgency is a judgment call here, so it is not checked.",
     "message": "Do you offer a discount for student teams of 10?",
-    "category": ["sales"]
+    "category": [
+      "sales"
+    ]
   },
   {
     "name": "ambiguous: upgrade button broken",
     "purpose": "Fits two categories: the customer wants to buy (sales) and something is broken (technical). Either passes. Catches a model that answers unknown when it has to choose.",
     "message": "I want to upgrade to Pro but the upgrade button gives an error.",
-    "category": ["sales", "technical"]
+    "category": [
+      "sales",
+      "technical"
+    ]
   },
   {
     "name": "not a support request",
     "purpose": "Off-topic. Must be unknown. Catches a model that forces every message into a real category.",
     "message": "What's a good pizza place near campus?",
-    "category": ["unknown"]
+    "category": [
+      "unknown"
+    ]
   }
 ]

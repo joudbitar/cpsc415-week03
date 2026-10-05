@@ -15,9 +15,10 @@ python3 eval.py
 ```
 
 ## Conventions
-- Language: Python 3.9 or later, standard library only.
-- Default model: `minimax/minimax-m3`. The eval also runs on `xiaomi/mimo-v2.6-flash`.
-- File names are lowercase with underscores. Programs sit at the repository root.
+- Team: Fartrepreneurs. Members: Joud Bitar.
+- Language: Python. This lab uses 3.9 or later, standard library only.
+- Models: Claude Opus 5.5 for the coding agent. `minimax/minimax-m3` for everything the program calls. The eval also runs on `xiaomi/mimo-v2.6-flash`.
+- File names are lowercase_with_underscores. Programs sit at the repository root.
 - No tests are required this week. `eval.py` is the check.
 - No branches or pull requests this week. Commit to `main`.
 
