@@ -4,20 +4,22 @@
      Graded: does it reflect how the team actually works? -->
 
 ## What this repository is
-One paragraph. Link to the current `spec.md`.
+A classifier for customer-support messages that prints JSON, with a five-case eval run on more than one model. The design is in [`spec.md`](spec.md).
 
 ## Commands
 ```
-# build
-# test
 # run
-# lint
+python3 classify.py "<message>"
+# eval
+python3 eval.py
 ```
 
 ## Conventions
-- Language and style rules the agent must follow.
-- Where tests live and how they are named.
-- Branch and PR naming.
+- Language: Python 3.9 or later, standard library only.
+- Default model: `minimax/minimax-m3`. The eval also runs on `xiaomi/mimo-v2.6-flash`.
+- File names are lowercase with underscores. Programs sit at the repository root.
+- No tests are required this week. `eval.py` is the check.
+- No branches or pull requests this week. Commit to `main`.
 
 ## Working rules
 

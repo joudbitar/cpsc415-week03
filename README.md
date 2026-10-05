@@ -1,45 +1,70 @@
-# Artifact-chain template
+# Support message classifier
 
-Starting point for major project submissions in CPSC 415 (AI Integration, Trinity College). Click **Use this template** on GitHub to create your own repository from it. Do not fork.
+Takes one customer-support message and prints JSON with a category (`billing`, `technical`, `sales` or `unknown`), an urgency (`low`, `medium` or `high`) and a one-sentence reason. `eval.py` runs it on five known messages and prints PASS or FAIL for each.
 
-The course follows Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook): every stage of the work leaves a short, version-controlled artifact. The agent writes most of the code. You decide what gets built, steer, verify, and explain every choice. These files are how you prove you understood what the agent built.
+Built for CPSC 415 Week 3 from [`intent/classifier.md`](intent/classifier.md) and [`spec.md`](spec.md).
 
-## Early labs
+## Run it
 
-Week 1 uses the minimal repository described in the course handout. Later introductory labs complete only the stages assigned so far. This template describes the full chain for team projects and the final portfolio; it does not require unintroduced artifacts in Week 1. Project languages are chosen and justified, with one separate guided exercise in an unfamiliar language.
+Python 3.9 or newer, standard library only.
 
-## The chain
+```bash
+export CHAT_BASE_URL=https://openrouter.ai/api/v1
+export CHAT_MODEL=minimax/minimax-m3
+export OPENROUTER_API_KEY=...   # never in a file in this repo
+python3 classify.py "I was charged twice for my subscription this month."
+python3 eval.py
+```
 
-| Stage | File | Written by | Approved by |
+```text
+PASS 1. clear billing: billing/high
+PASS 2. clear technical: technical/high
+PASS 3. clear sales: sales/low
+PASS 4. ambiguous: upgrade button broken: technical/medium
+PASS 5. not a support request: unknown/low
+minimax/minimax-m3: 5/5 passed · 1321 in / 511 out · $0.000996
+```
+
+To compare models, change only `CHAT_MODEL` and run `eval.py` again.
+
+## The five cases
+
+| Case | Message | Passes with | What it is there to catch |
 |---|---|---|---|
-| Plan | `intent/<name>.md` | The agent, after interviewing you | You |
-| Design | `spec.md` | The agent, from the approved intent | You, against the intent |
-| Build | `plan.md`, then code on a branch | The agent | You, before any code |
-| Test | tests, lint, CI | The agent | You confirm the loop actually ran |
-| Deploy | a pull request reviewed against `REVIEW.md` | A separate reviewing agent | You merge |
-| Maintain | a new `intent/<name>.md` | Triggered by a bug, a ticket, or a model change | You triage |
+| 1 | "I was charged twice for my subscription this month." | billing, urgency high | A model that misses the easy case, or does not treat a wrong charge as urgent |
+| 2 | "The app crashes every time I log in, I can't use it at all." | technical, urgency high | Same for a blocked customer |
+| 3 | "Do you offer a discount for student teams of 10?" | sales | A pre-purchase question. Urgency is a judgment call, so it is not checked |
+| 4 | "I want to upgrade to Pro but the upgrade button gives an error." | sales or technical | A message that fits two categories. Catches a model that gives up and says unknown |
+| 5 | "What's a good pizza place near campus?" | unknown | A model that forces every message into a real category |
 
-`CLAUDE.md` and `REVIEW.md` travel with the repo and are graded artifacts.
+## Results
 
-## Rules that are graded
+| Model | Cases passed | Tokens in / out | Cost |
+|---|---|---|---|
+| `minimax/minimax-m3` | 5 of 5 | 1321 / 511 | $0.000996 |
+| `xiaomi/mimo-v2.6-flash` | 5 of 5 | 578 / 350 | $0.000169 |
+| `typesafe/jev-router` | 5 of 5 | 570 / 243 | $0.000179 |
 
-- Intent and spec exist before code. Plan is approved before implementation. The commit history shows it.
-- One pull request per feature, from a branch, reviewed before merge. Do not commit to `main` directly after the first commit.
-- `spec.md` states the **language** and the **model** for each component and why.
-- `ANNOTATION.md` answers the four questions for the finished project.
-- No secrets in the repo. `.claude/settings.local.json` and `.env` are ignored; the `.example` file shows the shape.
+All three gave the same answer on every case, including technical on the ambiguous one. MiniMax M3 counted more than twice the input tokens for the same prompts and cost about six times what MiMo did. One run each, so these are observations. Details are in [`CHECKS.md`](CHECKS.md).
 
-## Submitting
+Five passes out of five on every model also means my cases are too easy to tell the models apart.
 
-Tag the commit you are submitting and put the repository URL plus the tag on Moodle:
+## What I corrected
 
+In the intent, I deleted a "support team that reads every message by hand" that the agent invented as the user. It is only me. I also defined `high` urgency (the customer is blocked, or money was taken wrongly) and limited the urgency check to cases where one answer is obvious.
+
+In the spec, I added a third run on `typesafe/jev-router`. The draft compared only the two cheap class models, and I wanted to see whether a router that picks the model for each request did any better. On these five cases it did not.
+
+I also had to settle one thing the draft raised. A broken reply prints `unknown`, and case 5 expects `unknown`, so a broken reply could pass by accident. I chose to count every fallback as FAIL.
+
+## One line I can explain
+
+```python
+start, end = text.find("{"), text.rfind("}")
 ```
-git tag tp1-submitted
-git push origin tp1-submitted
-```
 
-Tags the course uses: `intent-spec`, `tp1-submitted`, `tp2-submitted`, `portfolio-final`.
+That is in `parse_reply` in `classify.py`. Models often wrap the JSON in a code fence or add a sentence before it. This line finds the first `{` and the last `}` in the reply, and the next line hands only that slice to `json.loads`. If the slice is not JSON, or a field has a value outside the allowed lists, the program prints the `unknown` fallback and marks the reply as not ok, which `eval.py` counts as FAIL.
 
-## Running the agent
+## How it was built
 
-Copy `.claude/settings.local.json.example` to `.claude/settings.local.json` and fill in your OpenRouter key and model slugs, or use the `orclaude` launcher from the [course repository](https://github.com/kousen/ai-integration-course/tree/main/scripts).
+Harness: Claude Code. Model: Claude Opus 5.5, on my Claude subscription. The agent drafted the intent and the spec, I chose between the options and approved each one, and the agent wrote `classify.py`, `eval.py` and the first draft of the cases, which I picked. The program's own calls go through my OpenRouter account.
