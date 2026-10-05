@@ -37,4 +37,4 @@ Me, learning how to get data out of a model and check it.
 ## Open questions
 None left.
 
-**Approved by:** <your name>, <date>
+**Approved by:** Joud Bitar, 2026-10-05
